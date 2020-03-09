@@ -1,0 +1,36 @@
+#! /usr/bin/python3
+
+import argparse
+import xmlrpc.client as xmlrpclib
+from pprint import pprint
+
+# initiate argument parser
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", "--torrent", help="Add torrent seed to download")
+parser.add_argument("-u", "--url", help="Add url to download")
+parser.add_argument("-s", "--globalstat", help="Get global stat", action="store_true")
+parser.add_argument("-c", "--cleanup", help="Purge completed/error/removed downloads to free memory", action="store_true")
+parser.add_argument("-d", "--shutdown", help="Shutdown aria2 daemon", action="store_true")
+
+# global vars
+secret = 'token:abcd1234'
+srv = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
+args = parser.parse_args()
+
+if args.torrent:
+    r = srv.aria2.addTorrent(secret, xmlrpclib.Binary(open(args.torrent, mode='rb').read()))
+    pprint(r)
+if args.url:
+    r = srv.aria2.addUri(secret, [args.url])
+    pprint(r)
+if args.globalstat:
+    pprint('Waiting Tasks:')
+    pprint(srv.aria2.tellWaiting(secret, 0, 100))
+    pprint('Active Tasks:')
+    pprint(srv.aria2.tellActive(secret, ['downloadSpeed', 'completedLength', 'totalLength', 'numSeeders']))
+    pprint('Global status:')
+    pprint(srv.aria2.getGlobalStat(secret))
+if args.cleanup:
+    srv.aria2.purgeDownloadResult(secret)
+if args.shutdown:
+    srv.aria2.shutdown(secret)

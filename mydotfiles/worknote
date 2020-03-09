@@ -1,0 +1,177 @@
+1, build NSX-ESX
+On DBC, cd related component and make esx -j32
+
+2, build NSX-KVM
+On TCloud, cd related component and make build -j32
+
+3, Core file debug
+https://confluence.eng.vmware.com/pages/viewpage.action?spaceKey=~luoroy&postingDay=2018%2F7%2F15&title=nsx-opsagent+compilation+guide
+    a) Download binary file with symbol tables
+    b) Run /build/apps/bin/debugzilla.py <xxx>-zdump.00x
+    c) Get the line from the "Running debug command:
+    VSANTREE="/build/storage61/release/bora-7389155/bora" \
+    VMTREE="/build/storage61/release/bora-7389243/bora" \
+    VMBLD="beta" LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/build/toolchain/lin32/zlib-1.2.3-3/lib/" \
+    /build/storage61/release/bora-7389243/bora/support/scripts/debug-uw netcpa-zdump.003
+
+    AND PLUS ":symbolbinaryfile" at tail. Like below:
+    .....ipts/debug-uw netcpa-zdump.003:netcpa
+
+4, apt-get update force use IPv4: apt-get -o Acquire::ForceIPv4=true update
+
+5, gobuild nsx-mp-agent
+/build/apps/bin/gobuild sandbox queue nsx-mp-agent-esx65 --branch nsx-flash --buildtype beta --changeset
+
+6, /opt/vmware/nsx-nestdb/bin/nestdb-cli --cmd "get ContainerMsg"| wc -l
+
+7, Upgrade ESX:
+a), esxcli software sources profile list -d /vmfs/volumes/DT1/VMware-ESXi-6.5.0-8671363-dev-depot.zip
+Name                                         Vendor        Acceptance Level
+-------------------------------------------  ------------  ----------------
+ESXi-6.5.0-8671363-dev-pxe-tools             VMware, Inc.  PartnerSupported
+ESXi-6.5.0-8671363-no-tools-pxe              VMware, Inc.  PartnerSupported
+ESXi-6.5.0-8671363-standard-with-test-certs  VMware, Inc.  PartnerSupported
+ESXi-6.5.0-8671363-dev-pxe                   VMware, Inc.  PartnerSupported
+ESXi-6.5.0-8671363-dev                       VMware, Inc.  PartnerSupported
+
+b), esxcli software profile update -d /vmfs/volumes/DT1/VMware-ESXi-6.5.0-8671363-dev-depot.zip -p ESXi-6.5.0-8671363-dev
+
+8, Show memory: memstats -r group-stats --unit mb -s 'gid:name:min:max:memSize:memSizePeak:rMinPeak' | grep -i netcpa
+
+9, PerforceError: Your session has expired, please login again.
+Solution is to run "p4_login -a -A" (note the underscore!)
+
+10, P4 usage:
+p4 open files: p4 diff -se //myclient/... | p4 -x - edit
+p4 revert //... : Revert every file you have open, in every one of your pending changelists, to its pre-opened state.
+p4 revert -c default //... : Revert every file open in the default changelist to its pre-opened state
+Move opened files from one changelist to another changelist:
+p4 opened -c #changelist | awk 'BEGIN{FS="#"} {print $1}' | p4 -x - reopen -c #changelist
+ESX60ep18 P4 view:
+View:
+	//depot/bora/vsphere60ep18/... //jinjung-esx60/bora/...
+	//depot/scons/vsphere60ep18/... //jinjung-esx60/scons/...
+	//depot/vmkdrivers/vsphere60ep18/... //jinjung-esx60/vmkdrivers/...
+ESX67u1 P4 view:
+View:
+	//depot/bora/vsphere67u1/... //jinjung-esx67/bora/...
+	//depot/scons/vsphere67u1/... //jinjung-esx67/scons/...
+	//depot/vmkdrivers/vsphere67u1/... //jinjung-esx67/vmkdrivers/...
+ESX65ep14 P4 view:
+View:
+	//depot/bora/vsphere65ep14/... //jinjung-esx65/bora/...
+	//depot/scons/vsphere65ep14/... //jinjung-esx65/scons/...
+	//depot/vmkdrivers/vsphere65ep14/... //jinjung-esx65/vmkdrivers/...
+VShield-main view:
+View:
+    //vshield/esx-datapath/vshield-main/... //CLIENT-NAME/esx-datapath/...
+
+11, Find exclude some directory: -path ./misc -prune -o
+example: exclude one directory
+    find . -path ./misc -prune -o -name '*.txt'
+example: exclude multiple directories
+    find . \( -path dir1 -o -path dir2 \) -prune -o -name "*.so"
+
+12, Print C++ base class members in gdb: set print object on
+
+13, ldd on ESXi:
+/build/toolchain/lin64/glibc-2.5-123-11.1/usr/bin/ldd -v /usr/lib/vmware/netcpa/bin/netcpa
+
+14, Construct FRAG netcpa-zdump files:
+/mts/git/bin/vm-support-reconstruct -r <dir-with-frag-files>
+
+15, Delete files name with special character:
+>ls -li  "list inode number
+>find . -inum inodenum -delete (or find . -inum inodenum -exec rm -i {} \;)
+
+16, packet capture:
+pktcap-uw --switchport 67108872 --dir 0 --ethtype 0x0806 -o ./vdrport_dir0-arp.pcap &  pktcap-uw --switchport 6710887
+2 --dir 1 --ethtype 0x0806 -o ./vdrport_dir1-arp.pcap
+
+17, gobuild command:
+gobuild-sandbox-queue nsxv-datapath/vsmva --component-builds nsxv-datapath=sb-20086572 --changeset 1665548 --buildtype beta --branch vshield-main
+
+18, install vib:
+[esx-host]$wget http://build-squid.eng.vmware.com/build/mts/release/sb-21118382/publish/esx60/VMware-ESXi-6.0.0-21118382-nsxv-datapath.zip
+[esx-host]$esxcli software vib install -d /tmp/VMware-ESXi-6.0.0-21118382-nsxv-datapath.zip
+
+19, debugzilla.py: get vmkernel core info
+(gdb) source /build/mts/release/sb-21600106/publish/.gdbinit
+(gdb) print-vmkmod-addrs
+$7 = vmkernel 0 0 0
+$8 = chardevs 72018498891776 72016937877504 72016937878592
+$101 = nsxt-kcp 72018515509248 72017380376576 72017380377408
+$102 = nsxt-ipfix 72018515726336 72017384570880 72017384573536
+(gdb) p *$7
+$108 = {versionInfo = "Version BETAbuild-10884942",
+(gdb) p *$102
+$109 = {versionInfo = "Version 2.0.0-0 BETAbuild-21566666, Built on: Mar  4 2019",
+
+20, esx cmd operate VM: vim-cmd vmsvc/power.on 1 "power on vm 1
+
+21, kubectl
+>kubectl describe pod tcp-rc-w4rqj
+>kubectl get pods -o wide [-w]
+>kubectl create -f tcp-rc.yml
+>kubectl delete -f tcp-rc.yml
+
+22, rpm install/upgrade
+>rpm -ivh --force <rpm package>: force install
+>rpm -Uvh --force <rpm package>: force upgrade
+
+23, gdb debug stripped binary which is running with unstripped binary
+>gdb ./unstripped_symbol.binary
+gdb>attach pid_stripped_binary
+
+24, nsx-t MP rest API
+>curl -X GET -k --user admin https://<nsx-mgr>/api/v1/firewall/excludelist
+
+25, esx userworld livecore
+>worldID=`echo -n $(pidof nsx-cfgagent)`; vsish -e set /userworld/cartel/$worldID/debug/livecore 1
+
+26, esx mount nfs
+>esxcfg-nas -a dbc1131 -o pa-dbc1131.eng.vmware.com  -s /dbc/pa-dbc1131
+
+27, unload/load KCP module
+>stop nsx-exporter
+>clear "com.vmware.net.port.nat" properties
+>clear "com.vmware.net.container" properties
+>net-dvs -u com.vmware.nsx.kcp.enable -p hostPropList nsxvswitch #clear kcp.enable
+>unload the kcp
+>load kcp and set kcp.enable true
+
+28, vsphere build
+Download vsphere code:
+>p5 client (provide project: bora, scons, vmkdrivers. use branch "main")
+>copy dbc:~/workspace/Local.sc to your vsphere workspace
+Build:
+>scons esx-all
+Clean:
+>scons clobber
+
+19:45:57.951 main       INFO     Defining top level targets:
+19:45:57.951 main       INFO      visor-pxe
+19:45:57.952 main       INFO      esx-tests
+19:45:57.952 main       INFO      esxi
+19:45:57.953 main       INFO      esx-all
+19:45:57.954 main       INFO      petronas-all
+19:45:57.954 main       INFO      bc-all
+19:45:57.954 main       INFO      cimpdk-all
+19:45:57.955 main       INFO      esxcli-dk-all
+19:45:57.955 main       INFO      nvdk-all
+19:45:57.955 main       INFO      kmdk-all
+19:45:57.956 main       INFO      host-profiles-dk-all
+19:45:57.956 main       INFO      vib-all
+19:45:57.957 main       INFO      ddv-all
+19:45:57.957 main       INFO      configstore-dk-all
+19:45:57.957 main       INFO      devkits-all
+19:45:57.958 main       INFO      esx-all-broken
+19:46:00.173 scons      INFO     done reading SConscript files.
+
+29, pktcap-uw --vmk vmk0 --dir 2 -P --ropf "icmp" -o - | tcpdump-uw -nver -
+30, localcli system settings advanced set -o /VisorFS/VisorFSPristineTardisk -i 0
+31, git format-patch: git format-patch -1 -M -C -N -s -v --subject-prefix=ovs-dev
+32, Register VM from a command line in ESXi host
+>vim-cmd solo/registervm /vmfs/volumes/datastore_name/VM_directory/VM_name.vmx
+33, Change ESX70 filesystem write permission
+>localcli system settings advanced set -o /VisorFS/VisorFSPristineTardisk -i 0

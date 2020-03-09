@@ -1,0 +1,9 @@
+#!/bin/sh
+
+pid_urxvtd=`pidof urxvtd`
+if [ -z "$pid_urxvtd" ]; then
+    [ -f ~/.Xresources ] && xrdb -merge ~/.Xresources
+    urxvtd --quiet --opendisplay --fork
+fi
+
+urxvtc

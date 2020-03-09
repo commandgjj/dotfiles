@@ -1,0 +1,83 @@
+xman*topBox:false
+xman*bothShown:true
+!Xft.dpi:96
+!! RXVT-unicode setting
+URxvt.geometry:             200x200+130+140
+URxvt.background:           rgba:0000/0000/0000/cccc
+URxvt.foreground:           white
+URxvt.scrollBar:            False
+URxvt.scrollstyle:          next
+
+! Disable iso14755 mode (keycap picture insert mode)
+URxvt.iso14755: false
+URxvt.iso14755_52: false
+
+!设置颜色深度
+URxvt.depth: 32
+! Use shift+pageup/down to scroll in screen
+URxvt.secondaryScroll:  True
+!set the artificial transparency of the v.t.
+!URxvt.inheritPixmap:        True
+URxvt.tintColor:            grey
+URxvt.shading:              500
+URxvt.saveLines:            1500
+URxvt.preeditType:          Root
+URxvt.borderLess:           False
+URxvt.title:                gaojinjun@urxvt
+!italicFont and boldItalicFont undefined
+!URxvt.font:-*-Monaco-medium-r-*-*-20-*-*-*-*-*-*-*,\
+!xft:LiHei Pro:medium:pixelsize=22:antialias=True
+!URxvt.boldFont:-*-Monaco-bold-r-*-*-20-*-*-*-*-*-*-*,\
+!xft:LiHei Pro:bold:pixelsize=22:antialias=True
+!URxvt.font:xft:terminus:medium:size=13:antialias=false,\
+!xft:wenquanyi bitmap song:medium:pixelsize=13:antialias=False
+URxvt.font: xft:Monaco:size=22,\
+xft:DejaVu Sans YuanTi Condensed:size=20:antialias=True
+URxvt.boldFont: xft:Monaco:size=22,\
+xft:DejaVu Sans YuanTi Condensed:size=20:antialias=True
+!cursor
+URxvt.cursorBlink:        True
+!URxvt.cursorUnderline:    True
+URxvt.cursorcolor:        white
+!加入标签功能
+URxvt.perl-ext-common:default,tabbed,selection-to-clipboard,font-size,matcher
+URxvt.tabbed.tab-fg: 12
+URxvt.tabbed.tab-bg: 0
+!URxvt.tabbed.tabbar-fg: 4
+URxvt.keysym.Shift-Control-V: perl:clipboard:paste
+URxvt.keysym.M-u: perl:url-select:select_next
+URxvt.url-launcher: /usr/bin/google-chrome
+URxvt.underlineURLs: True
+URxvt.matcher.button: 1
+!comment this if we do not want copy when text is selected
+URxvt.clipboard.autocopy: True
+
+!setting urxvt icon file
+!URxvt*iconFile: /usr/share/terminfo/r/rxvt-xpm
+URxvt*iconFile: /usr/share/pixmaps/urxvt_32x32.xpm
+
+!redefine color to use tango theme in vim
+!Black
+URxvt.color0:           #000000
+URxvt.color8:           #555753
+!Red
+URxvt.color1:           #CC0000
+URxvt.color9:           #EF2929
+!Green
+URxvt.color2:           #4E9A06
+URxvt.color10:          #8AE234
+!Yellow
+URxvt.color3:           #C4A000
+URxvt.color11:          #FCE94F
+!Blue
+URxvt.color4:           #3465A4
+URxvt.color12:          #729FCF
+!Magenta
+URxvt.color5:           #75507B
+URxvt.color13:          #AD7FA8
+!Cyan
+URxvt.color6:           #06989A
+URxvt.color14:          #34E2E2
+!White
+URxvt.color7:           #D3D7CF
+URxvt.color15:          #FFFFFE

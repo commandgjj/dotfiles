@@ -1,0 +1,40 @@
+1, Install GP VPN
+> mkdir /var/tmp/GP-Linux
+> wget -q --no-check-certificate 'https://ftpsite.vmware.com/download?domain=FTPSITE&id=c0e6d587adf345abb6e2a975defc010e-fce187e7858a48dd8fa66725d727e736' -O /var/tmp/GP-Linux/gpinstall.sh
+> cd /var/tmp/GP-Linux && chmod 755 gpinstall.sh
+> ./gpinstall
+> gpu -c # connect
+> gpu -s # show status
+> gpu -d # disconnect
+2, Install wavebox which can be used to microsoft service client and also slack etc.
+3, Install skype for linux (google it)
+4, Install zoom: It will promot you to download zoom app when you click zoom meeting link in your mail
+5, Install onedrive: According to https://github.com/abraunegg/onedrive/blob/master/docs/INSTALL.md
+6, Install xlayoutdisplay to adjust multiple monitors
+>git clone https://github.com/alex-courtis/xlayoutdisplay.git
+>sudo apt install libx11-dev libboost-all-dev libxrandr-dev libxcursor-dev
+>cd xlayoutdisplay && mkdir build && cd build && cmake .. && make
+>sudo make install
+7, Upgrade nvidia property driver:
+>sudo apt purge nvidia-*
+>sudo ubuntu-drivers autoinstall
+>sudo prime-select intel
+>logout and login again
+>sudo prime-select nvidia
+>logout and login again
+nvidia library is located in /usr/lib/x86_64-linux-gnu/nvidia
+blacklist-nvidia conf file is located in /lib/modprobe.d/
+8, Resolve "PCIe Bus Error: severity=Corrected, type=Physical Layer, id=00e5(Receiver ID)" issue
+Add pcie_aspm=off boot parameter in /etc/default/grub, and update grub by:
+>sudo update-grub && sudo reboot
+9, Ubuntu has a freeze problem frequently. Use intel_idle.max_cstate=1 to fix it.
+>sudo vim /etc/default/grub
+Add "intel_idle.max_cstate=1" into line "GRUB_CMDLINE_LINUX_DEFAULT=xxxx" and
+save change.
+>sudo update-grub && sudo reboot
+Doc: https://bugzilla.kernel.org/show_bug.cgi?id=109051
+10, Resolve google-chrome cannot autofill username and password.
+https://superuser.com/questions/573602/chrome-not-saving-passwords-and-not-auto-filling-existing-login-passwords
+>cd ~/.config/google-chrome/Default
+>rm -rf Login\ Data Login\ Data-journal
+quit chrome and relaunch it.
